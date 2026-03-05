@@ -15,12 +15,12 @@ use LPhenom\Log\Contract\LogRecord;
  */
 final class StackLogger extends AbstractLogger
 {
-    /** @var HandlerInterface[] */
+    /** @var array<int, HandlerInterface> */
     private array $handlers;
 
     /**
-     * @param HandlerInterface[] $handlers
-     * @param string             $channel
+     * @param array<int, HandlerInterface> $handlers
+     * @param string                       $channel
      */
     public function __construct(array $handlers = [], string $channel = 'app')
     {

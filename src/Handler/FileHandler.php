@@ -56,7 +56,10 @@ final class FileHandler implements HandlerInterface
             if (!flock($fh, LOCK_EX)) {
                 throw new LogException('Cannot acquire flock on log file: ' . $this->filePath);
             }
-            fwrite($fh, $line);
+            $written = fwrite($fh, $line);
+            if ($written === false) {
+                throw new LogException('Failed to write to log file: ' . $this->filePath);
+            }
             flock($fh, LOCK_UN);
         } finally {
             fclose($fh);

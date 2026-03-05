@@ -12,11 +12,11 @@ use LPhenom\Log\Contract\LogRecord;
  */
 final class StackHandler implements HandlerInterface
 {
-    /** @var HandlerInterface[] */
+    /** @var array<int, HandlerInterface> */
     private array $handlers;
 
     /**
-     * @param HandlerInterface[] $handlers
+     * @param array<int, HandlerInterface> $handlers
      */
     public function __construct(array $handlers = [])
     {

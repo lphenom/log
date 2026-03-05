@@ -54,6 +54,41 @@ final class FormatterTest extends TestCase
         self::assertArrayHasKey('context', $decoded);
     }
 
+    public function testLineFormatterContainsMilliseconds(): void
+    {
+        $formatter = new LineFormatter();
+        // timestamp 1700000000.123 => ms=123
+        $record = new LogRecord(
+            timestamp: 1700000000.123,
+            level: 'info',
+            message: 'ms test',
+            channel: 'app',
+        );
+        $output = $formatter->format($record);
+
+        // must contain dot-separated ms: .123
+        self::assertMatchesRegularExpression('/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}/', $output);
+    }
+
+    public function testJsonFormatterContextIsObject(): void
+    {
+        $formatter = new JsonFormatter();
+        $record    = new LogRecord(
+            timestamp: 1700000000.0,
+            level: 'info',
+            message: 'ctx',
+            channel: 'app',
+            context: ['x' => 1, 'y' => 'hello'],
+        );
+        $output  = $formatter->format($record);
+        $decoded = json_decode(trim($output), true);
+
+        self::assertIsArray($decoded);
+        self::assertIsArray($decoded['context']);
+        self::assertSame(1, $decoded['context']['x']);
+        self::assertSame('hello', $decoded['context']['y']);
+    }
+
     public function testJsonFormatterEndsWithNewline(): void
     {
         $formatter = new JsonFormatter();

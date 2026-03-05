@@ -7,20 +7,30 @@ namespace LPhenom\Log\Contract;
 /**
  * Immutable log record DTO.
  *
- * Context values must be scalar or null (KPHP-compatible).
+ * Context values must be int|float|string|bool|null (KPHP-compatible, no objects/arrays/mixed).
+ * KPHP does not support the `scalar` pseudo-type in generics, so we use the explicit union.
+ *
+ * @phpstan-type ContextValue int|float|string|bool|null
+ * @phpstan-type Context array<string, ContextValue>
  */
 final class LogRecord
 {
     /**
-     * @param array<string, scalar|null> $context
+     * @var array<string, int|float|string|bool|null>
+     */
+    public readonly array $context;
+
+    /**
+     * @param array<string, int|float|string|bool|null> $context
      */
     public function __construct(
         public readonly float $timestamp,
         public readonly string $level,
         public readonly string $message,
         public readonly string $channel,
-        public readonly array $context = [],
+        array $context = [],
     ) {
+        $this->context = $context;
     }
 
     /**
@@ -33,8 +43,11 @@ final class LogRecord
             return '{}';
         }
 
-        $encoded = json_encode($this->context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $encoded = json_encode(
+            $this->context,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
+        );
 
-        return $encoded !== false ? $encoded : '{}';
+        return $encoded;
     }
 }

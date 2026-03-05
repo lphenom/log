@@ -11,24 +11,28 @@ use LPhenom\Log\Contract\LogRecord;
  * Formats a log record as a single JSON line (JSON Lines / NDJSON).
  *
  * Each record is one JSON object followed by a newline.
+ *
+ * KPHP note: we avoid building a mixed-value array for json_encode because
+ * KPHP requires uniform array value types. Instead we encode each field
+ * separately and assemble the JSON string manually.
  */
 final class JsonFormatter implements FormatterInterface
 {
     public function format(LogRecord $record): string
     {
-        $data = [
-            'timestamp' => $record->timestamp,
-            'channel'   => $record->channel,
-            'level'     => $record->level,
-            'message'   => $record->message,
-            'context'   => $record->context,
-        ];
+        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR;
 
-        $encoded = json_encode(
-            $data,
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
-        );
+        $timestamp = json_encode($record->timestamp, $flags);
+        $channel   = json_encode($record->channel, $flags);
+        $level     = json_encode($record->level, $flags);
+        $message   = json_encode($record->message, $flags);
+        $context   = json_encode($record->context, $flags);
 
-        return $encoded . PHP_EOL;
+        return '{"timestamp":' . $timestamp
+            . ',"channel":' . $channel
+            . ',"level":' . $level
+            . ',"message":' . $message
+            . ',"context":' . $context
+            . '}' . PHP_EOL;
     }
 }
