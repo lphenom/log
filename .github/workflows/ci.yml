@@ -8,16 +8,20 @@ on:
 
 jobs:
   lint:
-    name: Lint (PHP CS Fixer + PHPCS)
+    name: Lint (PHP CS Fixer + PHPCS) — PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: [ '8.1', '8.2', '8.3' ]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           tools: composer:v2
 
       - name: Install dependencies
@@ -30,16 +34,20 @@ jobs:
         run: composer phpcs
 
   phpstan:
-    name: Static Analysis (PHPStan)
+    name: Static Analysis (PHPStan) — PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: [ '8.1', '8.2', '8.3' ]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php }}
           tools: composer:v2
 
       - name: Install dependencies
@@ -49,7 +57,7 @@ jobs:
         run: composer phpstan
 
   test:
-    name: Tests (PHPUnit)
+    name: Tests (PHPUnit) — PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
 
     strategy:
