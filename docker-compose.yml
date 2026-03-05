@@ -1,0 +1,19 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lphenom-log-php:8.1.32
+    working_dir: /app
+    volumes:
+      - .:/app:delegated
+      - composer-cache:/root/.composer
+    environment:
+      COMPOSER_MEMORY_LIMIT: "-1"
+    tty: true
+    stdin_open: true
+
+volumes:
+  composer-cache:
+
+
