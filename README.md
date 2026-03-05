@@ -159,4 +159,4 @@ make phpstan
 
 ## License
 
-MIT © [dmitrii-pov](https://github.com/dmitrii-pov)
+MIT © [LPhenom Contributors](https://github.com/lphenom)
