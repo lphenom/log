@@ -19,7 +19,8 @@ abstract class AbstractLogger implements LoggerInterface
 {
     public function __construct(
         protected readonly string $channel = 'app',
-    ) {}
+    ) {
+    }
 
     abstract protected function writeRecord(LogRecord $record): void;
 
@@ -107,4 +108,3 @@ abstract class AbstractLogger implements LoggerInterface
         $this->log(LogLevel::DEBUG, $message, $context);
     }
 }
-

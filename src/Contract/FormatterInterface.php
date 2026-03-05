@@ -14,4 +14,3 @@ interface FormatterInterface
 {
     public function format(LogRecord $record): string;
 }
-
