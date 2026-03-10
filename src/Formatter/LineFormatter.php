@@ -13,14 +13,16 @@ use LPhenom\Log\Contract\LogRecord;
  * Example output:
  *   [2024-01-01 12:00:00.123] app.ERROR: Something went wrong {"user_id":42}
  *
- * Uses PHP date format 'Y-m-d H:i:s' + manual milliseconds extracted from the
- * fractional part of the Unix timestamp — KPHP-safe, no fmod/number_format tricks.
+ * KPHP-compatible: no readonly, no constructor property promotion.
  */
 final class LineFormatter implements FormatterInterface
 {
-    public function __construct(
-        private readonly string $dateFormat = 'Y-m-d H:i:s',
-    ) {
+    /** @var string */
+    private string $dateFormat;
+
+    public function __construct(string $dateFormat = 'Y-m-d H:i:s')
+    {
+        $this->dateFormat = $dateFormat;
     }
 
     public function format(LogRecord $record): string
@@ -38,7 +40,7 @@ final class LineFormatter implements FormatterInterface
             $record->channel,
             $level,
             $record->message,
-            $context,
+            $context
         ) . PHP_EOL;
     }
 }

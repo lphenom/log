@@ -16,7 +16,7 @@ return (new Config())
         'declare_strict_types'         => true,
         'no_unused_imports'            => true,
         'ordered_imports'              => ['sort_algorithm' => 'alpha'],
-        'trailing_comma_in_multiline'  => ['elements' => ['arrays', 'arguments', 'parameters']],
+        'trailing_comma_in_multiline'  => ['elements' => ['arrays']],
         'array_syntax'                 => ['syntax' => 'short'],
         'single_quote'                 => true,
         'no_extra_blank_lines'         => true,

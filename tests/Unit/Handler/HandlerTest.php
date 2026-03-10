@@ -16,10 +16,10 @@ final class HandlerTest extends TestCase
     private function makeRecord(): LogRecord
     {
         return new LogRecord(
-            timestamp: microtime(true),
-            level: 'info',
-            message: 'test message',
-            channel: 'app',
+            microtime(true),
+            'info',
+            'test message',
+            'app'
         );
     }
 

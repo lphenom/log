@@ -12,21 +12,36 @@ use LPhenom\Log\Contract\LogRecord;
  *
  * Each record is one JSON object followed by a newline.
  *
- * KPHP note: we avoid building a mixed-value array for json_encode because
- * KPHP requires uniform array value types. Instead we encode each field
- * separately and assemble the JSON string manually.
+ * KPHP note: JSON_UNESCAPED_UNICODE, JSON_UNESCAPED_SLASHES, JSON_THROW_ON_ERROR
+ * are NOT supported in KPHP. We use json_encode with 0 flags and check for false.
+ * We encode each field separately and assemble the JSON string manually to avoid
+ * mixed-value arrays (KPHP requires uniform array value types).
  */
 final class JsonFormatter implements FormatterInterface
 {
     public function format(LogRecord $record): string
     {
-        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR;
+        $timestamp = json_encode($record->timestamp, 0);
+        $channel   = json_encode($record->channel, 0);
+        $level     = json_encode($record->level, 0);
+        $message   = json_encode($record->message, 0);
+        $context   = json_encode($record->context, 0);
 
-        $timestamp = json_encode($record->timestamp, $flags);
-        $channel   = json_encode($record->channel, $flags);
-        $level     = json_encode($record->level, $flags);
-        $message   = json_encode($record->message, $flags);
-        $context   = json_encode($record->context, $flags);
+        if ($timestamp === false) {
+            $timestamp = '0';
+        }
+        if ($channel === false) {
+            $channel = '""';
+        }
+        if ($level === false) {
+            $level = '""';
+        }
+        if ($message === false) {
+            $message = '""';
+        }
+        if ($context === false) {
+            $context = '{}';
+        }
 
         return '{"timestamp":' . $timestamp
             . ',"channel":' . $channel

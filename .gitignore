@@ -4,7 +4,6 @@
 /.phpcs-cache
 /.phpunit.cache
 /.phpunit.result.cache
-/build/
 *.log
 
 .idea/

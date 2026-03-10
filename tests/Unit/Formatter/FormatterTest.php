@@ -13,12 +13,14 @@ final class FormatterTest extends TestCase
 {
     private function makeRecord(string $level = 'info', string $message = 'hello'): LogRecord
     {
+        /** @var array<string, int|float|string|false|null> $context */
+        $context = ['key' => 'val'];
         return new LogRecord(
-            timestamp: 1700000000.123,
-            level: $level,
-            message: $message,
-            channel: 'app',
-            context: ['key' => 'val'],
+            1700000000.123,
+            $level,
+            $message,
+            'app',
+            $context
         );
     }
 
@@ -59,10 +61,10 @@ final class FormatterTest extends TestCase
         $formatter = new LineFormatter();
         // timestamp 1700000000.123 => ms=123
         $record = new LogRecord(
-            timestamp: 1700000000.123,
-            level: 'info',
-            message: 'ms test',
-            channel: 'app',
+            1700000000.123,
+            'info',
+            'ms test',
+            'app'
         );
         $output = $formatter->format($record);
 
@@ -73,12 +75,14 @@ final class FormatterTest extends TestCase
     public function testJsonFormatterContextIsObject(): void
     {
         $formatter = new JsonFormatter();
+        /** @var array<string, int|float|string|false|null> $context */
+        $context   = ['x' => 1, 'y' => 'hello'];
         $record    = new LogRecord(
-            timestamp: 1700000000.0,
-            level: 'info',
-            message: 'ctx',
-            channel: 'app',
-            context: ['x' => 1, 'y' => 'hello'],
+            1700000000.0,
+            'info',
+            'ctx',
+            'app',
+            $context
         );
         $output  = $formatter->format($record);
         $decoded = json_decode(trim($output), true);

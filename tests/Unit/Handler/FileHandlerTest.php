@@ -41,10 +41,10 @@ final class FileHandlerTest extends TestCase
     private function makeRecord(string $message = 'test'): LogRecord
     {
         return new LogRecord(
-            timestamp: microtime(true),
-            level: 'info',
-            message: $message,
-            channel: 'app',
+            microtime(true),
+            'info',
+            $message,
+            'app'
         );
     }
 
@@ -75,7 +75,7 @@ final class FileHandlerTest extends TestCase
     {
         $path    = $this->tmpDir . '/rotate.log';
         // Set very small maxBytes so rotation triggers after first write
-        $handler = new FileHandler($path, maxBytes: 1, maxFiles: 3);
+        $handler = new FileHandler($path, 1, 3);
 
         // First write - creates the file
         $handler->handle($this->makeRecord('first'));
@@ -91,7 +91,7 @@ final class FileHandlerTest extends TestCase
     public function testMultipleRotations(): void
     {
         $path    = $this->tmpDir . '/multi.log';
-        $handler = new FileHandler($path, maxBytes: 1, maxFiles: 3);
+        $handler = new FileHandler($path, 1, 3);
 
         for ($i = 0; $i < 5; $i++) {
             $handler->handle($this->makeRecord("msg $i"));
@@ -108,7 +108,7 @@ final class FileHandlerTest extends TestCase
     public function testNoRotationWhenMaxBytesIsZero(): void
     {
         $path    = $this->tmpDir . '/norotate.log';
-        $handler = new FileHandler($path, maxBytes: 0);
+        $handler = new FileHandler($path, 0);
 
         for ($i = 0; $i < 3; $i++) {
             $handler->handle($this->makeRecord("line $i"));

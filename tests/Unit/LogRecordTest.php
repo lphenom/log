@@ -12,46 +12,45 @@ final class LogRecordTest extends TestCase
     public function testContextJsonEmptyContext(): void
     {
         $record = new LogRecord(
-            timestamp: 1700000000.0,
-            level: 'info',
-            message: 'test',
-            channel: 'app',
+            1700000000.0,
+            'info',
+            'test',
+            'app'
         );
-
         self::assertSame('{}', $record->contextJson());
     }
-
     public function testContextJsonWithValues(): void
     {
+        // KPHP-compatible context: int|float|string|false|null (no true, use false)
+        /** @var array<string, int|float|string|false|null> $context */
+        $context = ['user_id' => 42, 'action' => 'login', 'flag' => false, 'empty' => null];
         $record = new LogRecord(
-            timestamp: 1700000000.0,
-            level: 'error',
-            message: 'fail',
-            channel: 'app',
-            context: ['user_id' => 42, 'action' => 'login', 'flag' => true, 'empty' => null],
+            1700000000.0,
+            'error',
+            'fail',
+            'app',
+            $context
         );
-
         $json = $record->contextJson();
         $decoded = json_decode($json, true);
-
         self::assertIsArray($decoded);
         self::assertSame(42, $decoded['user_id']);
         self::assertSame('login', $decoded['action']);
-        self::assertTrue($decoded['flag']);
+        self::assertFalse($decoded['flag']);
         self::assertNull($decoded['empty']);
     }
-
-    public function testRecordPropertiesAreReadonly(): void
+    public function testRecordPropertiesAreAccessible(): void
     {
         $ts = microtime(true);
+        /** @var array<string, int|float|string|false|null> $context */
+        $context = ['key' => 'value'];
         $record = new LogRecord(
-            timestamp: $ts,
-            level: 'debug',
-            message: 'hello',
-            channel: 'test',
-            context: ['key' => 'value'],
+            $ts,
+            'debug',
+            'hello',
+            'test',
+            $context
         );
-
         self::assertSame($ts, $record->timestamp);
         self::assertSame('debug', $record->level);
         self::assertSame('hello', $record->message);

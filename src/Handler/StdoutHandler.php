@@ -11,10 +11,13 @@ use LPhenom\Log\Formatter\LineFormatter;
 
 /**
  * Writes log records to STDOUT.
+ *
+ * KPHP-compatible: no readonly, no constructor property promotion.
  */
 final class StdoutHandler implements HandlerInterface
 {
-    private readonly FormatterInterface $formatter;
+    /** @var FormatterInterface */
+    private FormatterInterface $formatter;
 
     public function __construct(?FormatterInterface $formatter = null)
     {

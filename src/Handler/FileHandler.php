@@ -12,25 +12,41 @@ use LPhenom\Log\Formatter\LineFormatter;
 
 /**
  * Writes log records to a file with:
- *   - exclusive flock() to prevent interleaved writes
  *   - size-based log rotation (renames current file to .1, .2, …)
+ *
+ * KPHP-compatible: no readonly, no constructor property promotion, no trailing commas,
+ * no flock() (KPHP does not support LOCK_EX/LOCK_UN constants),
+ * try/catch + re-throw pattern instead of try/finally.
  */
 final class FileHandler implements HandlerInterface
 {
-    private readonly FormatterInterface $formatter;
+    /** @var string */
+    private string $filePath;
+
+    /** @var int */
+    private int $maxBytes;
+
+    /** @var int */
+    private int $maxFiles;
+
+    /** @var FormatterInterface */
+    private FormatterInterface $formatter;
 
     /**
-     * @param string             $filePath    Absolute path to the log file.
-     * @param int                $maxBytes    Maximum file size before rotation (0 = no rotation).
-     * @param int                $maxFiles    Number of rotated files to keep.
+     * @param string                  $filePath  Absolute path to the log file.
+     * @param int                     $maxBytes  Maximum file size before rotation (0 = no rotation).
+     * @param int                     $maxFiles  Number of rotated files to keep.
      * @param FormatterInterface|null $formatter
      */
     public function __construct(
-        private readonly string $filePath,
-        private readonly int $maxBytes = 10 * 1024 * 1024, // 10 MiB
-        private readonly int $maxFiles = 5,
-        ?FormatterInterface $formatter = null,
+        string $filePath,
+        int $maxBytes = 10 * 1024 * 1024,
+        int $maxFiles = 5,
+        ?FormatterInterface $formatter = null
     ) {
+        $this->filePath  = $filePath;
+        $this->maxBytes  = $maxBytes;
+        $this->maxFiles  = $maxFiles;
         $this->formatter = $formatter ?? new LineFormatter();
     }
 
@@ -52,17 +68,22 @@ final class FileHandler implements HandlerInterface
             throw new LogException('Cannot open log file: ' . $this->filePath);
         }
 
+        // KPHP requires at least one catch — store exception and re-throw after cleanup.
+        // Note: flock() is NOT used because LOCK_EX/LOCK_UN constants are not supported in KPHP.
+        $exception = null;
         try {
-            if (!flock($fh, LOCK_EX)) {
-                throw new LogException('Cannot acquire flock on log file: ' . $this->filePath);
-            }
             $written = fwrite($fh, $line);
             if ($written === false) {
                 throw new LogException('Failed to write to log file: ' . $this->filePath);
             }
-            flock($fh, LOCK_UN);
-        } finally {
-            fclose($fh);
+        } catch (\Throwable $e) {
+            $exception = $e;
+        }
+
+        fclose($fh);
+
+        if ($exception !== null) {
+            throw $exception;
         }
     }
 

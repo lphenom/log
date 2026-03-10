@@ -1,7 +1,7 @@
 DC = docker compose
 PHP = $(DC) run --rm php
 
-.PHONY: up down build shell install test lint lint-fix phpstan phpcs
+.PHONY: up down build shell install test lint lint-fix phpstan phpcs kphp-check
 
 ## Start containers
 up:
@@ -42,4 +42,8 @@ phpstan:
 ## Run PHPCS
 phpcs:
 	$(PHP) composer phpcs
+
+## Build KPHP binary + PHAR and verify both stages
+kphp-check:
+	docker build -f Dockerfile.check -t lphenom-log-check .
 

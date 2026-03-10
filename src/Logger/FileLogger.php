@@ -11,10 +11,13 @@ use LPhenom\Log\Handler\FileHandler;
 /**
  * A logger that writes all records to a file.
  * Supports size-based rotation via FileHandler.
+ *
+ * KPHP-compatible: no readonly, no constructor property promotion, no trailing commas.
  */
 final class FileLogger extends AbstractLogger
 {
-    private readonly FileHandler $handler;
+    /** @var FileHandler */
+    private FileHandler $handler;
 
     /**
      * @param string                  $filePath  Absolute path to the log file.
@@ -28,7 +31,7 @@ final class FileLogger extends AbstractLogger
         int $maxBytes = 10 * 1024 * 1024,
         int $maxFiles = 5,
         string $channel = 'app',
-        ?FormatterInterface $formatter = null,
+        ?FormatterInterface $formatter = null
     ) {
         parent::__construct($channel);
         $this->handler = new FileHandler($filePath, $maxBytes, $maxFiles, $formatter);

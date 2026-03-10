@@ -10,14 +10,17 @@ use LPhenom\Log\Handler\StdoutHandler;
 
 /**
  * A logger that writes all records to STDOUT.
+ *
+ * KPHP-compatible: no readonly, no constructor property promotion, no trailing commas.
  */
 final class StdoutLogger extends AbstractLogger
 {
-    private readonly StdoutHandler $handler;
+    /** @var StdoutHandler */
+    private StdoutHandler $handler;
 
     public function __construct(
         string $channel = 'app',
-        ?FormatterInterface $formatter = null,
+        ?FormatterInterface $formatter = null
     ) {
         parent::__construct($channel);
         $this->handler = new StdoutHandler($formatter);
