@@ -1,5 +1,6 @@
 {
     "name": "lphenom/log",
+    "version": "0.1.0",
     "description": "KPHP-compatible logging package for the LPhenom framework",
     "type": "library",
     "license": "MIT",

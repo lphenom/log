@@ -1,45 +1,45 @@
-# lphenom/log — Package Documentation
+# lphenom/log — Документация пакета
 
-## Overview
+## Обзор
 
-`lphenom/log` is a lightweight, KPHP-compatible logging library for the LPhenom framework.
-It provides a clean, explicit API with no magic, no reflection, and full PHP 8.1+ strict typing.
-
----
-
-## Table of Contents
-
-- [Contracts](#contracts)
-- [Log Levels](#log-levels)
-- [LogRecord DTO](#logrecord-dto)
-- [Formatters](#formatters)
-- [Handlers](#handlers)
-- [Loggers](#loggers)
-- [Context Rules](#context-rules)
-- [Extending](#extending)
+`lphenom/log` — лёгкая KPHP-совместимая библиотека логирования для фреймворка LPhenom.
+Предоставляет чистый, явный API без магии, без Reflection и с полной строгой типизацией PHP 8.1+.
 
 ---
 
-## Contracts
+## Содержание
 
-All core interfaces live in `LPhenom\Log\Contract`.
-
-| Interface / Class        | Purpose                             |
-|--------------------------|-------------------------------------|
-| `LoggerInterface`        | Logger contract with sugar methods  |
-| `HandlerInterface`       | Handler contract (`handle()`)       |
-| `FormatterInterface`     | Formatter contract (`format()`)     |
-| `LogLevel`               | Level constants + validation        |
-| `LogRecord`              | Immutable log record DTO            |
+- [Контракты](#контракты)
+- [Уровни логов](#уровни-логов)
+- [DTO LogRecord](#dto-logrecord)
+- [Форматтеры](#форматтеры)
+- [Обработчики](#обработчики)
+- [Логгеры](#логгеры)
+- [Правила контекста](#правила-контекста)
+- [Расширение](#расширение)
 
 ---
 
-## Log Levels
+## Контракты
 
-Defined as string constants in `LPhenom\Log\Contract\LogLevel`.
-Ordered by severity (0 = most severe):
+Все основные интерфейсы находятся в `LPhenom\Log\Contract`.
 
-| Constant              | Value         | RFC 5424 |
+| Интерфейс / Класс        | Назначение                                  |
+|--------------------------|---------------------------------------------|
+| `LoggerInterface`        | Контракт логгера со вспомогательными методами|
+| `HandlerInterface`       | Контракт обработчика (`handle()`)           |
+| `FormatterInterface`     | Контракт форматтера (`format()`)            |
+| `LogLevel`               | Константы уровней + валидация               |
+| `LogRecord`              | Иммутабельный DTO записи лога               |
+
+---
+
+## Уровни логов
+
+Определены как строковые константы в `LPhenom\Log\Contract\LogLevel`.
+Упорядочены по серьёзности (0 = наиболее критично):
+
+| Константа             | Значение      | RFC 5424 |
 |-----------------------|---------------|----------|
 | `LogLevel::EMERGENCY` | `emergency`   | 0        |
 | `LogLevel::ALERT`     | `alert`       | 1        |
@@ -58,15 +58,15 @@ LogLevel::severityMap();      // ['emergency' => 0, ..., 'debug' => 7]
 
 ---
 
-## LogRecord DTO
+## DTO LogRecord
 
-`LPhenom\Log\Contract\LogRecord` is an immutable value object created by the logger.
+`LPhenom\Log\Contract\LogRecord` — иммутабельный объект-значение, создаваемый логгером.
 
 ```php
 new LogRecord(
-    timestamp: microtime(true),  // float — Unix timestamp with microseconds
-    level:     'error',          // string — one of LogLevel constants
-    message:   'Something broke',
+    timestamp: microtime(true),   // float — Unix-время с микросекундами
+    level:     'error',           // string — одна из констант LogLevel
+    message:   'Что-то сломалось',
     channel:   'app',
     context:   ['user_id' => 42],
 );
@@ -76,14 +76,14 @@ $record->contextJson(); // '{"user_id":42}'
 
 ---
 
-## Formatters
+## Форматтеры
 
 ### LineFormatter
 
-Produces a single human-readable line:
+Формирует одну человекочитаемую строку:
 
 ```
-[2024-01-15 12:34:56.789] app.ERROR: Something broke {"user_id":42}
+[2024-01-15 12:34:56.789] app.ERROR: Что-то сломалось {"user_id":42}
 ```
 
 ```php
@@ -95,10 +95,10 @@ $line = $formatter->format($record);
 
 ### JsonFormatter
 
-Produces one JSON object per line (NDJSON / JSON Lines):
+Формирует один JSON-объект на строку (NDJSON / JSON Lines):
 
 ```json
-{"timestamp":1705318496.789,"channel":"app","level":"error","message":"Something broke","context":{"user_id":42}}
+{"timestamp":1705318496.789,"channel":"app","level":"error","message":"Что-то сломалось","context":{"user_id":42}}
 ```
 
 ```php
@@ -110,11 +110,11 @@ $line = $formatter->format($record);
 
 ---
 
-## Handlers
+## Обработчики
 
 ### NullHandler
 
-Discards all records silently. Useful in tests.
+Молча отбрасывает все записи. Удобен в тестах.
 
 ```php
 use LPhenom\Log\Handler\NullHandler;
@@ -123,7 +123,7 @@ $handler = new NullHandler();
 
 ### StdoutHandler
 
-Writes formatted output to STDOUT.
+Записывает форматированный вывод в STDOUT.
 
 ```php
 use LPhenom\Log\Handler\StdoutHandler;
@@ -134,28 +134,28 @@ $handler = new StdoutHandler(new JsonFormatter());
 
 ### FileHandler
 
-Writes to a file with exclusive `flock()` and size-based rotation.
+Записывает в файл с эксклюзивным `flock()` и ротацией по размеру.
 
 ```php
 use LPhenom\Log\Handler\FileHandler;
 
 $handler = new FileHandler(
     filePath: '/var/log/app/app.log',
-    maxBytes: 10 * 1024 * 1024,  // 10 MiB
-    maxFiles: 5,                   // keep app.log.1 … app.log.5
+    maxBytes: 10 * 1024 * 1024,  // 10 МиБ
+    maxFiles: 5,                   // хранить app.log.1 … app.log.5
 );
 ```
 
-**Rotation behaviour:**
-1. Before each write, the current file size is checked.
-2. If `size >= maxBytes`, existing `.1`…`.N` files are shifted up.
-3. The current file is renamed to `.1`.
-4. The oldest file (`.maxFiles`) is deleted.
-5. A fresh file is created for the new write.
+**Поведение ротации:**
+1. Перед каждой записью проверяется текущий размер файла.
+2. Если `size >= maxBytes`, существующие файлы `.1`…`.N` сдвигаются на один выше.
+3. Текущий файл переименовывается в `.1`.
+4. Самый старый файл (`.maxFiles`) удаляется.
+5. Создаётся новый файл для записи.
 
 ### StackHandler
 
-Delegates to multiple handlers in order:
+Делегирует сразу нескольким обработчикам по очереди:
 
 ```php
 use LPhenom\Log\Handler\StackHandler;
@@ -170,9 +170,9 @@ $handler->addHandler($extraHandler);
 
 ---
 
-## Loggers
+## Логгеры
 
-All loggers extend `AbstractLogger` which implements `LoggerInterface`.
+Все логгеры расширяют `AbstractLogger`, который реализует `LoggerInterface`.
 
 ### NullLogger
 
@@ -184,7 +184,7 @@ $logger = new \LPhenom\Log\Logger\NullLogger('channel');
 
 ```php
 $logger = new \LPhenom\Log\Logger\StdoutLogger('app');
-$logger->info('started');
+$logger->info('запущен');
 ```
 
 ### FileLogger
@@ -214,30 +214,30 @@ $logger->addHandler($anotherHandler);
 
 ---
 
-## Context Rules
+## Правила контекста
 
-KPHP requires that all array values are type-uniform. To keep the package KPHP-compatible, context values are restricted to `scalar|null`:
+KPHP требует однородности типов в массивах. Для обеспечения KPHP-совместимости значения контекста ограничены типом `scalar|null`:
 
-| Allowed              | Not Allowed          |
+| Допустимо            | Недопустимо          |
 |----------------------|----------------------|
-| `int`, `float`       | objects              |
-| `string`             | arrays               |
-| `bool`               | resources            |
-| `null`               | closures             |
+| `int`, `float`       | объекты              |
+| `string`             | массивы              |
+| `bool`               | ресурсы              |
+| `null`               | замыкания (Closure)  |
 
 ```php
-// ✅
-$logger->info('action', ['user_id' => 1, 'flag' => true, 'name' => 'Alice']);
+// ✅ Корректно
+$logger->info('действие', ['user_id' => 1, 'flag' => true, 'name' => 'Alice']);
 
-// ❌ will not type-check in KPHP
-$logger->info('action', ['user' => $userObject]);
+// ❌ Не пройдёт проверку типов KPHP
+$logger->info('действие', ['user' => $userObject]);
 ```
 
 ---
 
-## Extending
+## Расширение
 
-### Custom Handler
+### Собственный обработчик
 
 ```php
 use LPhenom\Log\Contract\HandlerInterface;
@@ -247,12 +247,12 @@ final class SlackHandler implements HandlerInterface
 {
     public function handle(LogRecord $record): void
     {
-        // send $record->message to Slack
+        // отправить $record->message в Slack
     }
 }
 ```
 
-### Custom Formatter
+### Собственный форматтер
 
 ```php
 use LPhenom\Log\Contract\FormatterInterface;
@@ -271,4 +271,3 @@ final class CsvFormatter implements FormatterInterface
     }
 }
 ```
-

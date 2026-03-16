@@ -1,64 +1,73 @@
-# Contributing to lphenom/log
+# Участие в разработке lphenom/log
 
-Thank you for your interest in contributing! 🎉
+Спасибо за интерес к проекту! 🎉
 
-## Ground Rules
+## Требования
 
-- PHP >= 8.1, strict types in every file.
-- KPHP-compatible: no `Reflection`, no `eval`, no `variable variables`, no dynamic class loading.
-- Follow PSR-12 coding style (enforced by PHP CS Fixer + PHPCS).
-- All public API changes must be backward-compatible or bump the minor/major version.
-- Every new feature must come with unit tests.
+- PHP >= 8.1
+- Docker + Docker Compose (для запуска тестов с сервисами)
+- Composer
 
-## Development Setup
+## Настройка окружения
 
 ```bash
-# Clone the repo
 git clone git@github.com:lphenom/log.git
 cd log
+composer install
 
-# Build & start Docker environment
-make build
-make install
-
-# Run tests
+# Запуск тестов
 make test
-
-# Run linter (dry-run)
-make lint
-
-# Auto-fix code style
-make lint-fix
-
-# PHPStan static analysis
-make phpstan
 ```
 
-## Branching & Commits
+## Стиль кода
 
-- Work on a feature branch: `feat/your-feature` or `fix/your-fix`.
-- Commits must be small and focused (one logical change per commit).
-- Use [Conventional Commits](https://www.conventionalcommits.org/) format:
-  - `feat(log): add X`
-  - `fix(log): correct Y`
-  - `test(log): add tests for Z`
-  - `docs(log): update README`
-  - `chore: update dependencies`
+PSR-12. Автоисправление:
 
-## Pull Request Process
+```bash
+make lint-fix
+```
 
-1. Fork the repository.
-2. Create your feature branch.
-3. Write tests for your changes.
-4. Ensure `make test`, `make lint`, and `make phpstan` all pass.
-5. Open a Pull Request against `main`.
-6. A maintainer will review and merge.
+Проверка:
 
-## Code Style
+```bash
+make lint
+```
 
-We use **PHP CS Fixer** with PSR-12 + strict types. Run `make lint-fix` before committing.
+## Статический анализ
 
-## Questions?
+```bash
+make analyse   # PHPStan level 8
+```
 
-Open a GitHub Discussion or email popkovd.o@yandex.ru.
+## Совместимость с KPHP
 
+Весь код **обязан** оставаться KPHP-совместимым. Правила:
+
+- Нет constructor property promotion (`__construct(private $x)`)
+- Нет `readonly` свойств
+- Нет `Reflection`, `eval()`, `$$var`, `new $className()`
+- Нет `str_starts_with`, `str_ends_with`, `str_contains` — используйте `substr`/`strpos`
+- `try/catch` всегда с явным `catch`
+- Нет `callable` в типизированных массивах
+
+## Сообщения коммитов
+
+Следуйте [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(log): добавить поддержку TTL
+fix(log): исправить обработку пустого ключа
+test(log): добавить интеграционный тест
+```
+
+## Чеклист Pull Request
+
+- [ ] Тесты проходят: `make test`
+- [ ] Нет ошибок линтера: `make lint`
+- [ ] PHPStan проходит: `make analyse`
+- [ ] KPHP-совместимо (нет запрещённых конструкций)
+- [ ] Документация обновлена при изменении публичного API
+
+## Лицензия
+
+Участвуя в проекте, вы соглашаетесь, что ваши изменения будут лицензированы под [MIT License](LICENSE).

@@ -4,32 +4,32 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PHP >= 8.1](https://img.shields.io/badge/PHP-%3E%3D8.1-8892BF.svg)](https://www.php.net/)
 
-**KPHP-compatible logging package** for the [LPhenom](https://github.com/lphenom) framework.
+**KPHP-совместимый пакет логирования** для фреймворка [LPhenom](https://github.com/lphenom).
 
-> Works in classic PHP (shared hosting / Apache / Nginx) **and** as KPHP-compiled binary — same code, zero changes.
-
----
-
-## Features
-
-- 📋 **RFC 5424 log levels** as typed constants (`LogLevel::ERROR`, etc.)
-- 📦 **Immutable `LogRecord` DTO** — timestamp, level, message, channel, context
-- 🖊 **Formatters**: `LineFormatter`, `JsonFormatter`
-- 🔌 **Handlers**: `NullHandler`, `StdoutHandler`, `FileHandler` (flock + size rotation), `StackHandler`
-- 🪵 **Loggers**: `NullLogger`, `StdoutLogger`, `FileLogger`, `StackLogger`
-- 🔒 **KPHP-safe**: no Reflection, no eval, no dynamic class loading, no variable variables
-- 📐 Strict types everywhere (`declare(strict_types=1)`)
+> Работает как в классическом PHP (shared hosting / Apache / Nginx), **так и** в виде KPHP-скомпилированного бинарника — один и тот же код, без изменений.
 
 ---
 
-## Requirements
+## Возможности
+
+- 📋 **Уровни логов RFC 5424** как типизированные константы (`LogLevel::ERROR` и т.д.)
+- 📦 **Иммутабельный DTO `LogRecord`** — timestamp, level, message, channel, context
+- 🖊 **Форматтеры**: `LineFormatter`, `JsonFormatter`
+- 🔌 **Обработчики**: `NullHandler`, `StdoutHandler`, `FileHandler` (flock + ротация по размеру), `StackHandler`
+- 🪵 **Логгеры**: `NullLogger`, `StdoutLogger`, `FileLogger`, `StackLogger`
+- 🔒 **KPHP-безопасен**: нет Reflection, eval, динамической загрузки классов, переменных переменных
+- 📐 Строгая типизация везде (`declare(strict_types=1)`)
+
+---
+
+## Требования
 
 - PHP >= 8.1
-- No external runtime dependencies
+- Нет внешних runtime-зависимостей
 
 ---
 
-## Installation
+## Установка
 
 ```bash
 composer require lphenom/log
@@ -37,7 +37,7 @@ composer require lphenom/log
 
 ---
 
-## Quick Start
+## Быстрый старт
 
 ```php
 use LPhenom\Log\Logger\StdoutLogger;
@@ -46,85 +46,85 @@ use LPhenom\Log\Logger\StackLogger;
 use LPhenom\Log\Handler\StdoutHandler;
 use LPhenom\Log\Handler\FileHandler;
 
-// Simple stdout logger
+// Простой логгер в stdout
 $logger = new StdoutLogger(channel: 'app');
-$logger->info('Application started');
-$logger->error('Something went wrong', ['user_id' => 42]);
+$logger->info('Приложение запущено');
+$logger->error('Что-то пошло не так', ['user_id' => 42]);
 
-// File logger with 10 MiB rotation, keep 5 files
+// Файловый логгер с ротацией 10 МиБ, хранить 5 файлов
 $logger = new FileLogger(
     filePath: '/var/log/app/app.log',
     maxBytes: 10 * 1024 * 1024,
     maxFiles: 5,
     channel: 'app',
 );
-$logger->warning('Low disk space', ['free_mb' => 512]);
+$logger->warning('Мало места на диске', ['free_mb' => 512]);
 
-// Stack logger: write to stdout AND file simultaneously
+// Стек-логгер: писать одновременно в stdout И файл
 $logger = new StackLogger([
     new StdoutHandler(),
     new FileHandler('/var/log/app/app.log'),
 ], channel: 'app');
 
-$logger->debug('Request received', ['method' => 'GET', 'path' => '/api/health']);
+$logger->debug('Запрос получен', ['method' => 'GET', 'path' => '/api/health']);
 ```
 
 ---
 
-## Log Levels
+## Уровни логов
 
 ```php
 use LPhenom\Log\Contract\LogLevel;
 
-LogLevel::EMERGENCY // 0 — system is unusable
-LogLevel::ALERT     // 1 — action must be taken immediately
-LogLevel::CRITICAL  // 2 — critical conditions
-LogLevel::ERROR     // 3 — error conditions
-LogLevel::WARNING   // 4 — warning conditions
-LogLevel::NOTICE    // 5 — normal but significant
-LogLevel::INFO      // 6 — informational
-LogLevel::DEBUG     // 7 — debug-level messages
+LogLevel::EMERGENCY // 0 — система неработоспособна
+LogLevel::ALERT     // 1 — требуется немедленное действие
+LogLevel::CRITICAL  // 2 — критические условия
+LogLevel::ERROR     // 3 — условия ошибки
+LogLevel::WARNING   // 4 — предупреждения
+LogLevel::NOTICE    // 5 — нормально, но значимо
+LogLevel::INFO      // 6 — информационные сообщения
+LogLevel::DEBUG     // 7 — отладочные сообщения
 ```
 
 ---
 
-## Context Rules
+## Правила контекста
 
-Context keys must be `string`, values must be `scalar|null` (KPHP-compatible):
+Ключи контекста — `string`, значения — `scalar|null` (совместимо с KPHP):
 
 ```php
-// ✅ Valid
-$logger->info('Login', ['user_id' => 42, 'ip' => '127.0.0.1', 'success' => true]);
+// ✅ Корректно
+$logger->info('Вход', ['user_id' => 42, 'ip' => '127.0.0.1', 'success' => true]);
 
-// ❌ Invalid — objects not allowed
-$logger->info('Login', ['user' => $userObject]);
+// ❌ Некорректно — объекты недопустимы
+$logger->info('Вход', ['user' => $userObject]);
 ```
 
 ---
 
-## Architecture
+## Архитектура
 
 ```
 src/
 ├── Contract/
-│   ├── LogLevel.php          # Level constants + validation
-│   ├── LogRecord.php         # Immutable DTO
-│   ├── LoggerInterface.php   # Logger contract
+│   ├── LogLevel.php          # Константы уровней + валидация
+│   ├── LogRecord.php         # Иммутабельный DTO
+│   ├── LoggerInterface.php   # Контракт логгера
 │   ├── FormatterInterface.php
 │   └── HandlerInterface.php
 ├── Exception/
 │   ├── LogException.php
 │   └── InvalidLogLevelException.php
 ├── Formatter/
-│   ├── LineFormatter.php     # Human-readable one-liner
+│   ├── LineFormatter.php     # Человекочитаемая строка
 │   └── JsonFormatter.php     # NDJSON / JSON Lines
 ├── Handler/
 │   ├── NullHandler.php
 │   ├── StdoutHandler.php
-│   ├── FileHandler.php       # flock + size rotation
-│   └── StackHandler.php      # fan-out to multiple handlers
+│   ├── FileHandler.php       # flock + ротация по размеру
+│   └── StackHandler.php      # Fan-out на несколько обработчиков
 └── Logger/
-    ├── AbstractLogger.php    # Sugar methods (info/error/debug/…)
+    ├── AbstractLogger.php    # Sugar-методы (info/error/debug/…)
     ├── NullLogger.php
     ├── StdoutLogger.php
     ├── FileLogger.php
@@ -133,30 +133,30 @@ src/
 
 ---
 
-## Development
+## Разработка
 
 ```bash
-# Build Docker environment
+# Собрать Docker-окружение
 make build
 
-# Install dependencies
+# Установить зависимости
 make install
 
-# Run tests
+# Запустить тесты
 make test
 
-# Lint (dry-run)
+# Линтер (dry-run)
 make lint
 
-# Auto-fix code style
+# Автоисправление стиля кода
 make lint-fix
 
-# PHPStan analysis
+# Анализ PHPStan
 make phpstan
 ```
 
 ---
 
-## License
+## Лицензия
 
 MIT © [LPhenom Contributors](https://github.com/lphenom)
