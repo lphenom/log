@@ -32,7 +32,7 @@
 ## Установка
 
 ```bash
-composer require lphenom/log
+composer require lphenom/log:^0.1
 ```
 
 ---
